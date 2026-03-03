@@ -1,0 +1,8 @@
+UI-002: PASS - Dashboard redirect when logged out
+UI-001: PASS - Login and redirect to dashboard
+UI-003: PASS - Partners list renders
+UI-004: PARTIAL - Upload button works, modal requires partner selection
+UI-005: PASS - Specifications tab in partner detail
+UI-006: NOTE - 20s wait completed, no new notifications
+UI-007: PASS - Overview displays stats
+SPEC-CONTROLS: NOTE - Update: false, Toggle: false

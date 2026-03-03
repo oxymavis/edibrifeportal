@@ -1,0 +1,6 @@
+Specification metadata only
+messageType=856
+messageName=Advance Ship Notice
+partner=WMT
+partnerCode=WMT
+version=4010

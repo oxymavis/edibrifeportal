@@ -1,0 +1,146 @@
+// EDI Portal - PostgreSQL schema via Prisma
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Partner {
+  id        String   @id @default(cuid())
+  name      String
+  code      String
+  status    String   @default("active") // active | inactive
+  industry  String   @default("retail")
+  website   String?
+  contactName  String
+  contactEmail String
+  contactPhone String?
+  environment String? // production | sandbox
+  createdAt DateTime @default(now())
+
+  subsidiaries Subsidiary[]
+}
+
+model Subsidiary {
+  id       String   @id @default(cuid())
+  partnerId String
+  partner  Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  name     String
+  code     String
+  region   String
+  status   String   @default("active")
+  supportedDocTypesX12   String[] @default([]) // Prisma 5+ supports native array for PostgreSQL
+  supportedDocTypesEdifact String[] @default([])
+
+  as2Profiles AS2Profile[]
+}
+
+model AS2Profile {
+  id                   String   @id @default(cuid())
+  subsidiaryId         String
+  subsidiary           Subsidiary @relation(fields: [subsidiaryId], references: [id], onDelete: Cascade)
+  name                 String
+  as2Id                String
+  as2Url               String
+  status               String   @default("active") // active | standby | inactive
+  encryptionCert       String?
+  signingCert          String?
+  mdnRequired          Boolean  @default(true)
+  mdnSigned            Boolean  @default(true)
+  encryptionAlgorithm  String   @default("AES-256")
+  signatureAlgorithm   String   @default("SHA-256")
+}
+
+model Certificate {
+  id           Int      @id @default(autoincrement())
+  name         String
+  serialNumber String
+  fingerprint  String
+  issuer       String
+  subject      String
+  algorithm    String
+  keySize      String
+  created      String   // YYYY-MM-DD
+  expires      String
+  usage        String
+  type         String
+  status       String   @default("active") // active | expiring | expired
+  partner      String
+  environment  String   // production | sandbox
+  createdAt    DateTime @default(now())
+}
+
+model Transaction {
+  id            String   @id @default(cuid())
+  type          String
+  typeName      String
+  partner       String
+  direction     String   // inbound | outbound
+  status        String   // completed | processing | error | pending
+  date          String
+  time          String
+  size          String
+  records       Int      @default(0)
+  controlNumber String
+  senderId      String
+  receiverId    String
+  raw           String   @db.Text
+  logs          Json     @default("[]") // LogEntry[]
+  errors        Json?    // ErrorEntry[]
+  environment   String
+  createdAt     DateTime @default(now())
+}
+
+model Notification {
+  id          Int      @id @default(autoincrement())
+  type        String   // warning | error | info
+  title       String
+  message     String   @db.Text
+  date        String
+  time        String
+  read        Boolean  @default(false)
+  archived    Boolean  @default(false)
+  environment String
+  action      Json?    // { label, href }
+  details     Json?    // Record<string, string>
+  createdAt   DateTime @default(now())
+}
+
+model UnisSpecification {
+  id          Int    @id @default(autoincrement())
+  code        String @unique
+  name        String
+  description String @db.Text
+  category    String
+  version     String
+  lastUpdated String
+}
+
+model TpSpecification {
+  id           String   @id @default(cuid())
+  messageType  String
+  messageName  String
+  partner      String
+  partnerCode  String
+  version      String
+  uploadedDate String
+  uploadedBy   String
+  fileType     String   // PDF | Excel | X12 | JSON
+  fileName     String
+  size         String
+  createdAt    DateTime @default(now())
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

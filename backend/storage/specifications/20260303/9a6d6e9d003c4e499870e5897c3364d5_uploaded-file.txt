@@ -1,0 +1,6 @@
+Specification metadata only
+messageType=850
+messageName=850
+partner=WMT
+partnerCode=WMT
+version=v1
